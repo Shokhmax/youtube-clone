@@ -1,0 +1,349 @@
+/////////////////////////////////////////////////DEBUG_FUNCTION
+function addZero(x, n) {
+	while (x.toString().length < n) { 
+		x = "0" + x;
+	}
+	return x;
+}
+/**
+ * 20170906_hcchoi<br>
+ * 스크립트 디버그 메소드 console.log()함수 활용<br>
+ * ex) use >>>> debugLog("open End Time", currentTime);<br>
+ * ex) print >>>> ## |15:31:20| checkSocket () :: Start Time = [864]
+ * 
+ * @param valueName
+ *            {String} 변수명
+ * @param value
+ *            {any} 변수값
+ * @param caller
+ *            {String} 호출함수명(자동)
+ */
+function MDBG(valueName, value, caller) {
+
+	var callerFun = arguments.callee.caller;
+	if (caller){
+		callerFun = callerFun.caller;
+	}
+	var pat = /^function\s+([a-zA-Z0-9_]+)\s*\(/i;
+	pat.exec(callerFun);
+	var func = new Object();
+	func.name = RegExp.$1;
+
+	var d = new Date();
+	var h = addZero(d.getHours(), 2);
+	var m = addZero(d.getMinutes(), 2);
+	var s = addZero(d.getSeconds(), 2);
+	var ms = addZero(d.getMilliseconds(), 3);
+	var currentTime = h + ":" + m + ":" + s /* + ":" + ms */;
+
+	var funNameArr = [];
+	var maxFunNameLength = 20;
+	var blankCount = maxFunNameLength - func.name.length;
+
+	for (var funnamei = 0; funnamei < func.name.length; funnamei++) {
+		funNameArr.push(func.name.charAt(funnamei));
+	}
+	for (var maxFunName = 0; maxFunName < blankCount; maxFunName++) {
+		funNameArr.push(" ");
+	}
+
+	var callFunName = funNameArr.join('');
+
+	var valueNameArr = [];
+	var maxValueNameLength = 25;
+	blankCount = maxValueNameLength - valueName.length;
+
+	for (var valuenamei = 0; valuenamei < valueName.length; valuenamei++) {
+		valueNameArr.push(valueName.charAt(valuenamei));
+	}
+	for (var maxValuenamei = 0; maxValuenamei < blankCount; maxValuenamei++) {
+		valueNameArr.push(" ");
+	}
+
+	var valueName1 = valueNameArr.join("");
+	var valueName2 = "## |" + currentTime + "| " + callFunName + "() :: " + valueName1;
+	
+	if(window.console == undefined) 
+		console = {log:function(){}};
+	
+	console.log( valueName2, value );
+	//alert("|" + currentTime + "| " + func.name + "() :: " + valueName + " = [" + value + "]");
+	
+	var log = document.getElementById("log");
+	if( log != null)
+	log.value = log.value + "|" + currentTime + "| " + func.name + "() :: " + valueName + " = [" + value + "]\n";
+	//document.writeln("## |" + currentTime + "| " + callFunName + "() :: " + valueName1 + " = [" + value + "]<br><\n>"); 
+}
+// /////////////////////////////////////////////////////////////
+
+
+/*
+ * hcchoi_20170330
+ * base64_encode() - base64인코딩 함수
+ */
+var MaBase64 = {
+	// private property
+	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+ 
+	// public method for encoding
+	encode : function (input) {
+		var output = "";
+		var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+		var i = 0;
+ 
+		input = MaBase64._utf8_encode(input);
+ 
+		while (i < input.length) {
+ 
+			chr1 = input.charCodeAt(i++);
+			chr2 = input.charCodeAt(i++);
+			chr3 = input.charCodeAt(i++);
+ 
+			enc1 = chr1 >> 2;
+			enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+			enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+			enc4 = chr3 & 63;
+ 
+			if (isNaN(chr2)) {
+				enc3 = enc4 = 64;
+			} else if (isNaN(chr3)) {
+				enc4 = 64;
+			}
+ 
+			output = output +
+			this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
+			this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+		}
+		return output;
+	},
+ 
+	// public method for decoding
+	decode : function (input) {
+		var output = "";
+		var chr1, chr2, chr3;
+		var enc1, enc2, enc3, enc4;
+		var i = 0;
+ 
+		input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+ 
+		while (i < input.length) {
+ 
+			enc1 = this._keyStr.indexOf(input.charAt(i++));
+			enc2 = this._keyStr.indexOf(input.charAt(i++));
+			enc3 = this._keyStr.indexOf(input.charAt(i++));
+			enc4 = this._keyStr.indexOf(input.charAt(i++));
+ 
+			chr1 = (enc1 << 2) | (enc2 >> 4);
+			chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+			chr3 = ((enc3 & 3) << 6) | enc4;
+ 
+			output = output + String.fromCharCode(chr1);
+ 
+			if (enc3 != 64) {
+				output = output + String.fromCharCode(chr2);
+			}
+			if (enc4 != 64) {
+				output = output + String.fromCharCode(chr3);
+			}
+		}
+		output = MaBase64._utf8_decode(output);
+ 
+		return output;
+	},
+ 
+	// private method for UTF-8 encoding
+	_utf8_encode : function (string) {
+		string = string.replace(/\r\n/g,"\n");
+		var utftext = "";
+ 
+		for (var n = 0; n < string.length; n++) {
+ 
+			var c = string.charCodeAt(n);
+ 
+			if (c < 128) {
+				utftext += String.fromCharCode(c);
+			}
+			else if((c > 127) && (c < 2048)) {
+				utftext += String.fromCharCode((c >> 6) | 192);
+				utftext += String.fromCharCode((c & 63) | 128);
+			}
+			else {
+				utftext += String.fromCharCode((c >> 12) | 224);
+				utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+				utftext += String.fromCharCode((c & 63) | 128);
+			}
+		}
+		return utftext;
+	},
+ 
+	// private method for UTF-8 decoding
+	_utf8_decode : function (utftext) {
+		var string = "";
+		var i = 0;
+		var c = c1 = c2 = 0;
+ 
+		while ( i < utftext.length ) {
+ 
+			c = utftext.charCodeAt(i);
+ 
+			if (c < 128) {
+				string += String.fromCharCode(c);
+				i++;
+			}
+			else if((c > 191) && (c < 224)) {
+				c2 = utftext.charCodeAt(i+1); 
+				string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+				i += 2;
+			}
+			else {
+				c2 = utftext.charCodeAt(i+1);
+				c3 = utftext.charCodeAt(i+2);
+				string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+				i += 3;
+			}
+		}
+		return string;
+	}
+ }
+
+
+ua = navigator.userAgent;
+uaOs = ua.match(/(CrOS\ \w+|Windows\ NT|Mac\ OS\ X|Linux)\ ([\d\._]+)?/);
+uaBrowser = ua.match(/(opera|chrome|safari|firefox|msie|trident|edge(?=\/))\/?\s*(\d+)/i) || [];
+
+function getOsName() {
+	return uaOs [1] || "Unknown";
+}
+
+function getOsVersion(){
+	return uaOs [2] || "Unknown";
+}
+
+//20160720_hcchoi Linux 일 경우 OS 비트별 다운로드를 하기 위해 비트 체크
+function getOsBit(){
+	var osBit = "";
+	M = ua.match( /\(.*(Windows|Linux).*(WOW64|Win64|i686|x86_64).*?\)/i ) || [];
+	if( ua.indexOf("Macintosh") > 0 ){
+		osBit = "64";
+	}else if( M[2] != null ){
+		if( M[2].indexOf("64") > 0 ){
+			osBit = "64";
+		}else{
+		osBit = "32";
+		}
+	}else{
+		osBit = "32";
+	}
+	
+	return osBit;
+}
+
+function getBrowserName() {
+	var tem;
+	if (/trident/i.test(uaBrowser[1])) {
+		tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+		return "MSIE";
+	}
+	if (uaBrowser[1] === "Chrome") {
+		tem = ua.match(/\bOPR\/(\d+)/);
+		if (tem != null) {
+			return "Opera";
+		}
+		tem = ua.match(/\bEdge\/(\d+)/);
+		if (tem != null) {
+			return "Edge";
+		}
+	}
+	return uaBrowser[1];
+}
+
+function getBrowserVersion() {
+	var tem;
+	if (/trident/i.test(uaBrowser[0])) {
+		//tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+		//return tem[1];
+		return "11";
+	}
+	if (uaBrowser[1] === "Chrome") {
+		tem = ua.match(/\bOPR\/(\d+)/);
+		if (tem != null) {
+			return tem[1];
+		}
+		tem = ua.match(/\bEdge\/(\d+)/);
+		if (tem != null) {
+			return tem[1];
+		}
+	}
+	return uaBrowser[2];
+}
+
+
+function getBrowserBit(){
+	var bsBit = "";
+	M = ua.match(/ \(.*(Windows|Linux).*(x64|x86_64).*?\)/) || [];
+
+	if( M[2] != null ){
+		if (M[2].indexOf("64") > 0 ){
+			bsBit = "64";
+		}
+	}else{
+		bsBit = "32";
+	}			
+	return bsBit;
+}
+ 
+maUserInfo = new Object();
+maUserInfo.osName = getOsName();
+maUserInfo.osVersion = getOsVersion();
+maUserInfo.osBit = getOsBit();
+maUserInfo.bsName = getBrowserName();
+maUserInfo.bsVersion = getBrowserVersion();
+maUserInfo.bsBit = getBrowserBit();
+
+MDBG("maUserInfo", maUserInfo);
+
+function createAxObj(com) {
+	var axObjCreateFlag = false;
+	try {
+		axObj = new ActiveXObject(com);
+		axObjCreateFlag = true;
+	} catch (e) {
+	}
+	return axObjCreateFlag;
+}
+
+function getAcroPdfInstallFlag(){
+	var acrobatInstallFlag = false;
+	var axObjSupportFlag = (typeof (window.ActiveXObject) === 'function') ? true : false || ("ActiveXObject" in window);
+	var pdfAxSupportFlag = createAxObj("AcroPDF.PDF") || createAxObj("PDF.PdfCtrl");
+	
+	acrobatInstallFlag = (axObjSupportFlag && pdfAxSupportFlag);
+	MDBG("maAcrobatInstallFlag", acrobatInstallFlag);
+	return  acrobatInstallFlag;
+}
+
+function setCookie(cName, cValue, cDay) {
+	MDBG("", "start");
+	var expire = new Date();
+	expire.setDate(expire.getDate() + cDay);
+	cookies = cName + '=' + escape(cValue) + '; path=/ ';
+	if (typeof cDay != 'undefined')
+		cookies += ';expires=' + expire.toGMTString() + ';';
+	document.cookie = cookies;
+}
+
+function getCookie(cName) {
+	MDBG("", "start");
+	cName = cName + '=';
+	var cookieData = document.cookie;
+	var start = cookieData.indexOf(cName);
+	var cValue = '';
+	if (start != -1) {
+		start += cName.length;
+		var end = cookieData.indexOf(';', start);
+		if (end == -1)
+			end = cookieData.length;
+		cValue = cookieData.substring(start, end);
+	}
+	return unescape(cValue);
+}
